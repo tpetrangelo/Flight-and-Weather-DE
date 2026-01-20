@@ -1,0 +1,7 @@
+fr24sdk
+pandas
+pyarrow
+airportsdata
+requests
+boto3
+python-dotenv
