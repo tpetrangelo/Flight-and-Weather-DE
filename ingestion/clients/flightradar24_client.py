@@ -39,6 +39,8 @@ def _fetch_fr24_records() -> list[dict]:
 
     if not isinstance(records, list):
         raise ValueError(f"Unexpected FR24 records type: {type(records)}")
+    
+
 
     return records
 
@@ -56,6 +58,9 @@ def run() -> str:
 
     records = _fetch_fr24_records()
     df = pd.DataFrame.from_records(records)
+
+    if df is None or df.empty or df.columns.size == 0:
+        raise ValueError("FR24 returned no usable records (empty dataframe).")
 
     ts = datetime.now(timezone.utc)
     fr24_key = build_raw_key(SOURCE, ts, ext="parquet")

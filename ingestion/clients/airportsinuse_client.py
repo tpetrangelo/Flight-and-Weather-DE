@@ -11,7 +11,7 @@ from app.config import AWS_S3_BUCKET, AWS_S3_AIRPORTSINUSE_SOURCE
 
 
 BUCKET = AWS_S3_BUCKET
-WRITE_SOURCE = AWS_S3_AIRPORTSINUSE_SOURCE
+SOURCE = AWS_S3_AIRPORTSINUSE_SOURCE
 
 
 def extract_airports_in_use(flights_df: pd.DataFrame) -> pd.DataFrame:
@@ -19,8 +19,10 @@ def extract_airports_in_use(flights_df: pd.DataFrame) -> pd.DataFrame:
     Given a flights dataframe, return unique airports with lat/lon.
     Expects flights_df to have columns that identify origin/destination airport codes.
     """
+
+
     # Adjust column names to match your FR24 schema if needed
-    required_cols = ["origin", "destination"]
+    required_cols = ["orig_icao", "dest_icao"]
     missing = [c for c in required_cols if c not in flights_df.columns]
     if missing:
         raise ValueError(f"Missing columns in flights_df: {missing}. "
@@ -57,16 +59,20 @@ def run(fr24_s3_key: str) -> str:
     Returns the S3 key written.
     """
     flights_df = read_parquet_from_s3(BUCKET, fr24_s3_key)
+
+    if flights_df is None or flights_df.empty or flights_df.columns.size == 0:
+        raise ValueError(f"Flights parquet is empty or has no schema. key={fr24_s3_key}")
+
     airports_df = extract_airports_in_use(flights_df)
 
     ts = datetime.now(timezone.utc)
-    airport_key = build_raw_key(WRITE_SOURCE, ts, ext="parquet")
+    airport_key = build_raw_key(SOURCE, ts, ext="parquet")
 
     upload_parquet_to_s3(
         bucket=BUCKET,
         key=airport_key,
         df=airports_df,
-        metadata={"source": WRITE_SOURCE, "source_fr24_key": fr24_s3_key},
+        metadata={"source": SOURCE, "source_fr24_key": fr24_s3_key},
     )
 
     print(f"Wrote airports-in-use parquet to s3://{BUCKET}/{airport_key}")

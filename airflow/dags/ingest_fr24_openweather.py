@@ -8,7 +8,7 @@ from airflow import DAG
 try:
     from airflow.providers.standard.operators.python import PythonOperator
 except ImportError:
-    from airflow.operators.python import PythonOperator
+    from airflow.operators.python import PythonOperator # type: ignore
 
 # ✅ MUST come BEFORE importing ingestion.*
 PROJECT_PATH = "/opt/airflow/project"
@@ -31,7 +31,8 @@ with DAG(
     dag_id="ingest_fr24_and_openweather",
     default_args=default_args,
     start_date=datetime(2026, 1, 1),
-    schedule="0 */6 * * *",  # every 6 hours
+    # schedule="0 */6 * * *",  # every 6 hours
+    schedule = None,
     catchup=False,
     tags=["ingestion"],
 ) as dag:

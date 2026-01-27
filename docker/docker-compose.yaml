@@ -23,10 +23,10 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
+
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
-      - ~/.aws:/home/airflow/.aws:ro
       - airflow_logs:/opt/airflow/logs
     entrypoint: /bin/bash
     command:
@@ -61,20 +61,14 @@ services:
       AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
       AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
 
+
       # Logs (shared volume)
       AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
       AIRFLOW__LOGGING__REMOTE_LOGGING: "false"
 
-      # AWS (either via ~/.aws mount OR via env vars from .env)
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-2}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
-      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
-
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
-      - ~/.aws:/home/airflow/.aws:ro
       - airflow_logs:/opt/airflow/logs
     ports:
       - "8080:8080"
@@ -97,15 +91,9 @@ services:
       AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
       AIRFLOW__LOGGING__REMOTE_LOGGING: "false"
 
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-2}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
-      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
-
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
-      - ~/.aws:/home/airflow/.aws:ro
       - airflow_logs:/opt/airflow/logs
     command: scheduler
 

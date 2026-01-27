@@ -29,6 +29,9 @@ def read_parquet_from_s3(bucket: str, key: str) -> pd.DataFrame:
     s3 = _s3_client()
     obj = s3.get_object(Bucket=bucket, Key=key)
     data = obj["Body"].read()
+    if not isinstance(key, str) or not key:
+        raise TypeError(f"S3 key must be a non-empty str, got: {type(key)} {key!r}")
+
     return pd.read_parquet(BytesIO(data))
 
 
