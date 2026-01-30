@@ -15,7 +15,7 @@ PROJECT_PATH = "/opt/airflow/project"
 if PROJECT_PATH not in sys.path:
     sys.path.insert(0, PROJECT_PATH)
 
-from ingestion.clients.flightradar24_client import run as fr24_run
+from ingestion.clients.aerodatabox_client import run as adb_run
 from ingestion.clients.airportsinuse_client import run as airports_run
 from ingestion.clients.openweather_client import run as openweather_run
 
@@ -28,7 +28,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="ingest_fr24_and_openweather",
+    dag_id="ingest_adb_and_openweather",
     default_args=default_args,
     start_date=datetime(2026, 1, 1),
     # schedule="0 */6 * * *",  # every 6 hours
@@ -37,21 +37,21 @@ with DAG(
     tags=["ingestion"],
 ) as dag:
 
-    def _fr24_to_s3(**context) -> str:
+    def _adb_to_s3(**context) -> str:
         # should return the s3 key it wrote
-        return fr24_run()
+        return adb_run()
 
     def _airports_to_s3(ti, **context) -> str:
-        fr24_key = ti.xcom_pull(task_ids="fr24_to_s3")
-        return airports_run(fr24_s3_key=fr24_key)
+        adb_key = ti.xcom_pull(task_ids="adb_to_s3")
+        return airports_run(adb_s3_key=adb_key)
 
     def _openweather_to_s3(ti, **context) -> str:
         airports_key = ti.xcom_pull(task_ids="airports_to_s3")
         return openweather_run(airports_s3_key=airports_key)
 
-    fr24_to_s3 = PythonOperator(
-        task_id="fr24_to_s3",
-        python_callable=_fr24_to_s3,
+    adb_to_s3 = PythonOperator(
+        task_id="adb_to_s3",
+        python_callable=_adb_to_s3,
     )
 
     airports_to_s3 = PythonOperator(
@@ -64,4 +64,4 @@ with DAG(
         python_callable=_openweather_to_s3,
     )
 
-    fr24_to_s3 >> airports_to_s3 >> openweather_to_s3
+    adb_to_s3 >> airports_to_s3 >> openweather_to_s3

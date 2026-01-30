@@ -22,7 +22,7 @@ def extract_airports_in_use(flights_df: pd.DataFrame) -> pd.DataFrame:
 
 
     # Adjust column names to match your FR24 schema if needed
-    required_cols = ["orig_icao", "dest_icao"]
+    required_cols = ["departure_airport_iata", "movement__airport__iata"]
     missing = [c for c in required_cols if c not in flights_df.columns]
     if missing:
         raise ValueError(f"Missing columns in flights_df: {missing}. "
@@ -32,7 +32,7 @@ def extract_airports_in_use(flights_df: pd.DataFrame) -> pd.DataFrame:
     # Drop null/empty/non-strings
     airport_codes = [c for c in airport_codes if isinstance(c, str) and c.strip()]
 
-    airports = airportsdata.load("icao")
+    airports = airportsdata.load("iata")
 
     rows = []
     for code in airport_codes:
@@ -53,15 +53,15 @@ def extract_airports_in_use(flights_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def run(fr24_s3_key: str) -> str:
+def run(adb_s3_key: str) -> str:
     """
-    Read FR24 parquet from S3, extract airports in use + lat/lon, write airports parquet to S3.
+    Read ADB parquet from S3, extract airports in use + lat/lon, write airports parquet to S3.
     Returns the S3 key written.
     """
-    flights_df = read_parquet_from_s3(BUCKET, fr24_s3_key)
-
+    flights_df = read_parquet_from_s3(BUCKET, adb_s3_key)
+    print(flights_df)
     if flights_df is None or flights_df.empty or flights_df.columns.size == 0:
-        raise ValueError(f"Flights parquet is empty or has no schema. key={fr24_s3_key}")
+        raise ValueError(f"Flights parquet is empty or has no schema. key={adb_s3_key}")
 
     airports_df = extract_airports_in_use(flights_df)
 
@@ -72,7 +72,7 @@ def run(fr24_s3_key: str) -> str:
         bucket=BUCKET,
         key=airport_key,
         df=airports_df,
-        metadata={"source": SOURCE, "source_fr24_key": fr24_s3_key},
+        metadata={"source": SOURCE, "source_adb_key": adb_s3_key},
     )
 
     print(f"Wrote airports-in-use parquet to s3://{BUCKET}/{airport_key}")
