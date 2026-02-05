@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     number                          STRING,
-    callSign	                    STRING ,
+    callSign	                    STRING,
     status	                        STRING,
     codeshareStatus	                STRING,
     isCargo	                        BOOLEAN,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     airline__iata	                STRING,
     airline__icao	                STRING,
     movement__runway                STRING,
-    loaded_at                       TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP()
+    loaded_at                       TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP() NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS BRONZE.WEATHER (
@@ -47,5 +47,5 @@ CREATE TABLE IF NOT EXISTS BRONZE.WEATHER (
     weather_main	        STRING,
     weather_desc	        STRING,
     openweather_city_id     INT
-    loaded_at               TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP()
+    loaded_at               TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP() NOT NULL
 );
