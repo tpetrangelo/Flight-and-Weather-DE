@@ -1,4 +1,4 @@
-USE ROLE SECURITYADMIN;
+USE ROLE ACCOUNTADMIN;
 
 -- Let the ETL role “see” and “enter” the DB and schemas
 GRANT USAGE ON DATABASE FLIGHT_WEATHER TO ROLE ROLE_FLIGHT_WEATHER_ETL;
@@ -23,3 +23,16 @@ GRANT CREATE TABLE, CREATE VIEW
 GRANT CREATE TABLE, CREATE VIEW
   ON SCHEMA FLIGHT_WEATHER.GOLD
   TO ROLE ROLE_FLIGHT_WEATHER_ETL;
+-- IMPORTANT: if you have a user-grant line, ensure the user exists and is quoted if needed
+
+-- Verify
+SHOW GRANTS TO ROLE ROLE_FLIGHT_WEATHER_ETL;
+
+-- ==========================================================
+-- 03) INGEST CONFIG (as ETL role is fine if granted)
+-- File Formats + Stages
+-- ==========================================================
+USE ROLE ROLE_FLIGHT_WEATHER_ETL;
+USE WAREHOUSE FLIGHT_WEATHER_INGEST_WH;
+USE DATABASE FLIGHT_WEATHER;
+USE SCHEMA INGEST;
