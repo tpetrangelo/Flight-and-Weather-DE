@@ -1,3 +1,5 @@
+USE SCHEMA BRONZE;
+
 CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     number                          STRING,
     callSign	                    STRING,
@@ -29,6 +31,7 @@ CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     airline__iata	                STRING,
     airline__icao	                STRING,
     movement__runway                STRING,
+    source_file                     STRING,
     loaded_at                       TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP() NOT NULL
 );
 
@@ -47,5 +50,8 @@ CREATE TABLE IF NOT EXISTS BRONZE.WEATHER (
     weather_main	        STRING,
     weather_desc	        STRING,
     openweather_city_id     INT
-    loaded_at               TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP() NOT NULL
+ NOT NULL
 );
+
+-- Verify tables exist
+SHOW TABLES IN SCHEMA FLIGHT_WEATHER.BRONZE;
