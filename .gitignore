@@ -209,3 +209,6 @@ __marimo__/
 # AWS
 /aws
 .aws
+
+/secrets
+rsa_key.pub
