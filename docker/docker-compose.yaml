@@ -28,6 +28,7 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
       - airflow_logs:/opt/airflow/logs
+      - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
     entrypoint: /bin/bash
     command:
       - -lc
@@ -70,6 +71,8 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
       - airflow_logs:/opt/airflow/logs
+      - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
+
     ports:
       - "8080:8080"
     command: webserver
@@ -95,6 +98,7 @@ services:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
       - airflow_logs:/opt/airflow/logs
+      - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
     command: scheduler
 
 volumes:

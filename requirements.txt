@@ -5,3 +5,5 @@ airportsdata
 requests
 boto3
 python-dotenv
+cryptography
+snowflake-connector-python
