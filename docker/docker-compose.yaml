@@ -5,12 +5,11 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
-    ports:
-      - "5432:5432"
     volumes:
       - airflow_pgdata:/var/lib/postgresql/data
 
   airflow-init:
+    profiles: ["init"]
     build:
       context: ..
       dockerfile: docker/airflow/Dockerfile
@@ -23,7 +22,6 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
-
     volumes:
       - ../airflow/dags:/opt/airflow/dags
       - ../:/opt/airflow/project
@@ -47,58 +45,44 @@ services:
         airflow users reset-password --username admin --password admin
 
   airflow-webserver:
-    build:
-      context: ..
-      dockerfile: docker/airflow/Dockerfile
-    depends_on:
-      - postgres
-    env_file:
-      - ../.env
+    <<: &airflow-common
+      build:
+        context: ..
+        dockerfile: docker/airflow/Dockerfile
+      depends_on:
+        - postgres
+      env_file:
+        - ../.env
+      environment:
+        AIRFLOW__CORE__EXECUTOR: LocalExecutor
+        AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+        AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+        # Logs (shared volume)
+        AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+
+        # Webserver config
+        AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
+      volumes:
+        - ../airflow/dags:/opt/airflow/dags
+        - ../:/opt/airflow/project
+        - airflow_logs:/opt/airflow/logs
+        - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
+
+    ports:
+      - "8080:8080"
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
-      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
       AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
-
-
-      # Logs (shared volume)
       AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
-      AIRFLOW__LOGGING__REMOTE_LOGGING: "false"
 
-    volumes:
-      - ../airflow/dags:/opt/airflow/dags
-      - ../:/opt/airflow/project
-      - airflow_logs:/opt/airflow/logs
-      - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
-
-    ports:
-      - "8080:8080"
     command: webserver
 
   airflow-scheduler:
-    build:
-      context: ..
-      dockerfile: docker/airflow/Dockerfile
-    depends_on:
-      - postgres
-    env_file:
-      - ../.env
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
-
-      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
-      AIRFLOW__LOGGING__REMOTE_LOGGING: "false"
-
-    volumes:
-      - ../airflow/dags:/opt/airflow/dags
-      - ../:/opt/airflow/project
-      - airflow_logs:/opt/airflow/logs
-      - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
+    <<: *airflow-common
     command: scheduler
 
 volumes:

@@ -1,57 +1,72 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
-import sys
-import os
 
+# ============================
+# Standard library imports
+# ============================
+from datetime import datetime, timedelta
+import os
+import sys
+
+
+# ============================
+# Third-party imports
+# ============================
 import snowflake.connector
 
+
+# ============================
+# Airflow imports
+# ============================
 from airflow import DAG
-
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
-
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 
 try:
     from airflow.providers.standard.operators.python import PythonOperator
 except ImportError:
-    from airflow.operators.python import PythonOperator # type: ignore
+    from airflow.operators.python import PythonOperator  # type: ignore
 
 
+# ============================
+# Path bootstrap
+# ============================
 PROJECT_PATH = "/opt/airflow/project"
 if PROJECT_PATH not in sys.path:
     sys.path.insert(0, PROJECT_PATH)
+
+
+# ============================
+# Local project imports
+# ============================
+from app.snowflake_auth import load_private_key_der
 
 from ingestion.clients.aerodatabox_client import run as adb_run
 from ingestion.clients.airportsinuse_client import run as airports_run
 from ingestion.clients.openweather_client import run as openweather_run
 
+
+# ============================
+# Constants / configuration
+# ============================
 SNOWFLAKE_CONN_ID = os.getenv("SNOWFLAKE_CONN_ID", "snowflake_default")
 
-def _load_private_key_der() -> bytes:
-    key_path = os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH")
-    if not key_path:
-        raise ValueError("SNOWFLAKE_PRIVATE_KEY_PATH is not set")
+SNOWFLAKE_INGEST_DIR = os.path.join(PROJECT_PATH, "snowflake", "ingest")
 
-    passphrase = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
-    password_bytes = passphrase.encode() if passphrase else None
-
-    with open(key_path, "rb") as f:
-        pkey = serialization.load_pem_private_key(
-            f.read(),
-            password=password_bytes,
-            backend=default_backend(),
-        )
-
-    return pkey.private_bytes(
-        encoding=serialization.Encoding.DER,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
+FLIGHTS_SQL_PATH = os.path.join(SNOWFLAKE_INGEST_DIR, "07_copy_into_flights.sql")
+WEATHER_SQL_PATH = os.path.join(SNOWFLAKE_INGEST_DIR, "08_copy_into_weather.sql")
+VERIFY_SQL_PATH = os.path.join(SNOWFLAKE_INGEST_DIR, "09_verify_loads.sql")
 
 
+# ============================
+# Validate required files
+# ============================
+for p in [SNOWFLAKE_INGEST_DIR, FLIGHTS_SQL_PATH, WEATHER_SQL_PATH, VERIFY_SQL_PATH]:
+    if not os.path.exists(p):
+        raise FileNotFoundError(f"Missing inside Airflow container: {p}")
+
+
+# ============================
+# Snowflake helpers
+# ============================
 def _snowflake_connect():
     account = os.getenv("SNOWFLAKE_ACCOUNT")
     user = os.getenv("SNOWFLAKE_USER", "AIRFLOW_ETL_USER")
@@ -61,7 +76,7 @@ def _snowflake_connect():
     return snowflake.connector.connect(
         account=account,
         user=user,
-        private_key=_load_private_key_der(),
+        private_key=load_private_key_der(),
         authenticator="snowflake",
         warehouse="FLIGHT_WEATHER_INGEST_WH",
         role="ROLE_FLIGHT_WEATHER_ETL",
@@ -76,9 +91,7 @@ def _run_snowflake_sql_file(sql_path: str) -> None:
 
     conn = _snowflake_connect()
     try:
-        # Best way to run multi-statement SQL in Snowflake connector:
         for cur in conn.execute_string(sql_text):
-            # Consume results if any to avoid "results pending" edge cases
             try:
                 cur.fetchall()
             except Exception:
@@ -92,44 +105,40 @@ def _test_snowflake_connection() -> None:
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT CURRENT_USER(), CURRENT_ROLE(), CURRENT_WAREHOUSE(), CURRENT_DATABASE(), CURRENT_SCHEMA();"
+                "SELECT CURRENT_USER(), CURRENT_ROLE(), CURRENT_WAREHOUSE(), "
+                "CURRENT_DATABASE(), CURRENT_SCHEMA();"
             )
             print(cur.fetchone())
     finally:
         conn.close()
 
 
-
+# ============================
+# DAG defaults
+# ============================
 default_args = {
     "owner": "you",
     "retries": 2,
     "retry_delay": timedelta(minutes=5),
 }
 
-SNOWFLAKE_INGEST_DIR = os.path.join(PROJECT_PATH, "snowflake", "ingest")
 
-FLIGHTS_SQL_PATH = os.path.join(SNOWFLAKE_INGEST_DIR, "07_copy_into_flights.sql")
-WEATHER_SQL_PATH = os.path.join(SNOWFLAKE_INGEST_DIR, "08_copy_into_weather.sql")
-VERIFY_SQL_PATH  = os.path.join(SNOWFLAKE_INGEST_DIR, "09_verify_loads.sql")
-
-
-for p in [SNOWFLAKE_INGEST_DIR, FLIGHTS_SQL_PATH, WEATHER_SQL_PATH, VERIFY_SQL_PATH]:
-    if not os.path.exists(p):
-        raise FileNotFoundError(f"Missing inside Airflow container: {p}")
-
-
+# ============================
+# DAG definition
+# ============================
 with DAG(
     dag_id="ingest_adb_and_openweather_snowflake",
     default_args=default_args,
     start_date=datetime(2026, 1, 1),
-    # schedule="0 */6 * * *",  # every 6 hours
-    schedule = None,
+    schedule=None,
     catchup=False,
-    tags=["ingestion","snowflake"],
+    tags=["ingestion", "snowflake"],
 ) as dag:
 
+    # -----------------
+    # S3 ingestion callables
+    # -----------------
     def _adb_to_s3(**context) -> str:
-        # should return the s3 key it wrote
         return adb_run()
 
     def _airports_to_s3(ti, **context) -> str:
@@ -140,6 +149,9 @@ with DAG(
         airports_key = ti.xcom_pull(task_ids="airports_to_s3")
         return openweather_run(airports_s3_key=airports_key)
 
+    # -----------------
+    # S3 ingestion tasks
+    # -----------------
     adb_to_s3 = PythonOperator(
         task_id="adb_to_s3",
         python_callable=_adb_to_s3,
@@ -155,12 +167,9 @@ with DAG(
         python_callable=_openweather_to_s3,
     )
 
-
-    # ----------------
-    # Snowflake loading
-    # ----------------
-
-
+    # -----------------
+    # Snowflake tasks
+    # -----------------
     test_snowflake = PythonOperator(
         task_id="test_snowflake_connection",
         python_callable=_test_snowflake_connection,
@@ -184,11 +193,9 @@ with DAG(
         op_kwargs={"sql_path": VERIFY_SQL_PATH},
     )
 
-
-
-    # ------------
+    # -----------------
     # Dependencies
-    # ------------
+    # -----------------
     adb_to_s3 >> airports_to_s3 >> openweather_to_s3
     openweather_to_s3 >> test_snowflake
     test_snowflake >> [copy_flights_bronze, copy_weather_bronze]
