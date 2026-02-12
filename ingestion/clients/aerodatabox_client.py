@@ -87,7 +87,7 @@ def run() -> str:
     if not AERODATABOX_API_KEY:
         raise RuntimeError("AERODATABOX_API_KEY not set")
 
-    departure_airport_iata = ('ATL')#,'DFW','DEN','ORD','LAX','JFK','CLT','LAS','MCO','MIA')
+    departure_airport_iata = ('ATL','DFW') #,'DEN','ORD','LAX','JFK','CLT','LAS','MCO','MIA')
 
     df = _fetch_adb_records(departure_airport_iata)
 
