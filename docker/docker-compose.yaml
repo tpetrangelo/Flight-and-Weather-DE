@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - airflow_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
 
   airflow-init:
     profiles: ["init"]
@@ -80,10 +82,14 @@ services:
       AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
 
     command: webserver
+    restart: unless-stopped
+
 
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
+    restart: unless-stopped
+
 
 volumes:
   airflow_pgdata:
