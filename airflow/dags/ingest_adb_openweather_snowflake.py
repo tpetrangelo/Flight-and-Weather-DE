@@ -130,7 +130,7 @@ with DAG(
     dag_id="ingest_adb_and_openweather_snowflake",
     default_args=default_args,
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="*/30 * * * *",
     catchup=False,
     tags=["ingestion", "snowflake"],
 ) as dag:
