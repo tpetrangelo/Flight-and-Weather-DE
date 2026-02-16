@@ -31,7 +31,7 @@ def call_with_backoff(url, headers, querystring, max_retries=5, timeout=30) -> d
     raise RuntimeError("Max retries exceeded")
 
 
-def _fetch_adb_records(airports: str | Iterable[str]) -> pd.DataFrame:
+def _fetch_adb_records(airports: Iterable[str]) -> pd.DataFrame:
     """
     Fetch AeroDataBox departure data for multiple airports and normalize.
     Inject departure_airport_iata per record inside the loop.
@@ -40,22 +40,16 @@ def _fetch_adb_records(airports: str | Iterable[str]) -> pd.DataFrame:
     now = datetime.now(timezone.utc)
 
     if isinstance(airports, str):
-        url = f"https://aerodatabox.p.rapidapi.com/flights/airports/Iata/{airports}"
-        querystring = {"durationMinutes": "180", "direction": "Departure"}
+        airports = (airports,)
+
+    for airport in airports:
+        url = f"https://aerodatabox.p.rapidapi.com/flights/airports/Iata/{airport}"
+        querystring = {"durationMinutes": "360", "direction": "Departure"}
         headers = {
             "Accept": "application/json",
             "X-RapidAPI-Key": AERODATABOX_API_KEY,
             "X-RapidAPI-Host": "aerodatabox.p.rapidapi.com",
         }
-    else:
-        for airport in airports:
-            url = f"https://aerodatabox.p.rapidapi.com/flights/airports/Iata/{airport}"
-            querystring = {"durationMinutes": "180", "direction": "Departure"}
-            headers = {
-                "Accept": "application/json",
-                "X-RapidAPI-Key": AERODATABOX_API_KEY,
-                "X-RapidAPI-Host": "aerodatabox.p.rapidapi.com",
-            }
 
         response = call_with_backoff(url, headers=headers, querystring=querystring, timeout=30)
 
