@@ -70,6 +70,7 @@ services:
         - ../:/opt/airflow/project
         - airflow_logs:/opt/airflow/logs
         - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
+        - ../dbt/profiles:/opt/airflow/dbt_profiles:ro
 
     ports:
       - "8080:8080"
@@ -80,6 +81,8 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
       AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
       AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+
+
 
     command: webserver
     restart: unless-stopped
