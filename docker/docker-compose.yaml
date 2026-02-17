@@ -59,18 +59,19 @@ services:
         AIRFLOW__CORE__EXECUTOR: LocalExecutor
         AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
         AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-
+        
         # Logs (shared volume)
         AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
 
         # Webserver config
         AIRFLOW__WEBSERVER__SECRET_KEY: "REDACTED"
+
       volumes:
         - ../airflow/dags:/opt/airflow/dags
         - ../:/opt/airflow/project
         - airflow_logs:/opt/airflow/logs
         - ../secrets/rsa_key.p8:/opt/airflow/project/secrets/rsa_key.p8:ro
-        - ../dbt/profiles:/opt/airflow/dbt_profiles:ro
+        - ../dbt/profiles:/opt/airflow/dbt_profiles
 
     ports:
       - "8080:8080"
