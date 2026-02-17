@@ -48,7 +48,6 @@ services:
 
   airflow-webserver:
     <<: &airflow-common
-      user: "1000:1000"
       build:
         context: ..
         dockerfile: docker/airflow/Dockerfile
