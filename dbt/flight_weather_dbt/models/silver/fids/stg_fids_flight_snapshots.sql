@@ -2,11 +2,11 @@ with src as (
     select
         *,
         -- Parse timestamps (Snowflake will accept many formats, TRY_ is safer)
-        try_to_timestamp_ntz(window_start_utc)               as window_start_ts_utc,
-        try_to_timestamp_ntz(window_end_utc)                 as window_end_ts_utc,
-        try_to_timestamp_ntz(movement__scheduledtime__utc)   as sched_dep_ts_utc,
-        try_to_timestamp_ntz(movement__revisedtime__utc)     as revised_dep_ts_utc,
-        try_to_timestamp_ntz(movement__runwaytime__utc)      as runway_ts_utc
+        movement__scheduledtime__utc as sched_dep_ts_utc,
+        movement__revisedtime__utc   as revised_dep_ts_utc,
+        window_start_utc             as window_start_ts_utc,
+        window_end_utc               as window_end_ts_utc
+
     from {{ source('bronze', 'FLIGHTS') }}
 
 ),
