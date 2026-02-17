@@ -7,7 +7,8 @@ with src as (
         try_to_timestamp_ntz(movement__scheduledtime__utc)   as sched_dep_ts_utc,
         try_to_timestamp_ntz(movement__revisedtime__utc)     as revised_dep_ts_utc,
         try_to_timestamp_ntz(movement__runwaytime__utc)      as runway_ts_utc
-    from {{ source('bronze', 'flights') }}
+    from {{ source('bronze', 'FLIGHTS') }}
+
 ),
 
 clean as (
