@@ -72,4 +72,4 @@ select
     ) as flight_key
 
 from clean
-where sched_dep_ts_utc is not null;
+where sched_dep_ts_utc is not null
