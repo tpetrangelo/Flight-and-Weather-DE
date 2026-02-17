@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: FLIGHT_WEATHER        # change if different
+    schema: BRONZE
+    tables:
+      - name: FLIGHTS
