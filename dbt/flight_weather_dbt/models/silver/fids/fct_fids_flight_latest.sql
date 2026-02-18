@@ -19,4 +19,4 @@ dedup as (
 select
     * exclude (rn)
 from dedup
-where rn = 1;
+where rn = 1
