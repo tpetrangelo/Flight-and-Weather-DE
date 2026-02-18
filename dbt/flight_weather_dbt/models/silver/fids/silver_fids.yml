@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_fids_flight_snapshots
+    description: "Cleaned flight snapshots (not deduped). One row per flight_key per snapshot time."
+    columns:
+      - name: flight_key
+        description: "Deterministic key for a scheduled flight (dep airport + flight number + scheduled dep UTC minute)."
+        tests:
+          - not_null
+
+      # Rename this to whatever your snapshot timestamp column is called in the model
+      - name: loaded_at_ts_utc
+        description: "Timestamp for when this snapshot was captured/loaded."
+        tests:
+          - not_null
+
+    tests:
+      # Requires dbt_utils in packages.yml + dbt deps
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - flight_key
+            - loaded_at_ts_utc
+
+  - name: fct_fids_flight_latest
+    description: "Latest known state per flight_key (deduped). One row per flight_key."
+    columns:
+      - name: flight_key
+        tests:
+          - not_null
+          - unique
+
+      - name: departure_airport_iata
+        tests:
+          - not_null
+
+      - name: sched_dep_ts_utc
+        tests:
+          - not_null
+
+      - name: loaded_at_ts_utc
+        description: "Ingestion timestamp used to choose latest snapshot."
+        tests:
+          - not_null

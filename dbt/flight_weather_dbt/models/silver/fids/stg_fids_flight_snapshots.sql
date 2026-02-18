@@ -54,7 +54,7 @@ clean as (
         datediff('minute', sched_dep_ts_utc, coalesce(revised_dep_ts_utc, sched_dep_ts_utc)) as dep_delay_min,
 
         -- lineage
-        loaded_at,
+        loaded_at as loaded_at_ts_utc,
         source_file,
         row_hash
 
@@ -70,6 +70,7 @@ select
         flight_number_clean,
         to_char(sched_dep_ts_utc, 'YYYYMMDDHH24MI')
     ) as flight_key
+
 
 from clean
 where sched_dep_ts_utc is not null
