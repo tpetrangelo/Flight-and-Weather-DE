@@ -7,3 +7,5 @@ sources:
     tables:
       - name: FLIGHTS
         identifier: FLIGHTS
+      - name: WEATHER
+        identifier: WEATHER

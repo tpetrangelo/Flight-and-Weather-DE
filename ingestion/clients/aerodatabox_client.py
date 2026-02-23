@@ -63,7 +63,7 @@ def _fetch_adb_records(airports: Iterable[str]) -> pd.DataFrame:
             if isinstance(d, dict):
                 d["departure_airport_iata"] = airport
                 d["window_start_utc"] = now
-                d["window_end_utc"] = now + timedelta(hours=6)
+                d["window_end_utc"] = now + timedelta(hours=3)
                 d["source"] = "AeroDataBox"
                 d["schema_version"] = "1.0"
                 d["sched_dep_date"] = now.date().isoformat()
