@@ -3,10 +3,10 @@
 with snaps as (
     select
         flight_key,
-        dep_airport_iata,
-        arr_airport_iata,
+        departure_airport_iata,
+        arrival_airport_iata,
         airline_iata,
-        flight_number_normalized,
+        flight_number_clean,
         status_normalized,
         sched_dep_ts_utc,
         dep_best_ts_utc,
@@ -42,8 +42,8 @@ wx as (
         airport_iata,
         obs_ts_utc,
         temp_c,
-        pressure_hpa,
-        humidity_pct,
+        pressure as pressure_hpa,
+        humidity as humidity_pct,
         wind_speed_mps,
         wind_deg,
         visibility_m,
@@ -64,7 +64,7 @@ wx_asof as (
         w.condition_main
     from flight_cutoff f
     join wx w
-      on w.airport_iata = f.dep_airport_iata
+      on w.airport_iata = f.departure_airport_iata
      and w.obs_ts_utc <= f.cutoff_ts_utc
     qualify row_number() over (
       partition by f.flight_key
@@ -85,10 +85,10 @@ label_window as (
 
 select
     f.flight_key,
-    f.dep_airport_iata,
-    f.arr_airport_iata,
+    f.departure_airport_iata,
+    f.arrival_airport_iata,
     f.airline_iata,
-    f.flight_number_normalized,
+    f.flight_number_clean,
     f.status_normalized as status_at_cutoff,
     f.sched_dep_ts_utc,
     f.cutoff_ts_utc,
