@@ -230,4 +230,4 @@ with DAG(
     openweather_to_s3 >> test_snowflake
     test_snowflake >> [copy_flights_bronze, copy_weather_bronze]
     [copy_flights_bronze, copy_weather_bronze] >> verify_loads
-    verify_loads >> dbt_build_silver
+    verify_loads >> dbt_build_silver >> dbt_test_freshness
