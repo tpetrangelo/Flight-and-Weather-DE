@@ -25,6 +25,7 @@ try:
 except ImportError:
     from airflow.operators.python import PythonOperator  # type: ignore
 
+from airflow.providers.standard.operators.bash import BashOperator 
 
 # ============================
 # Path bootstrap
@@ -132,7 +133,7 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     schedule="*/30 * * * *",
     catchup=False,
-    tags=["ingestion", "snowflake"],
+    tags=["bronze", "silver", "snowflake", "dbt"],
 ) as dag:
 
     # -----------------
@@ -194,9 +195,23 @@ with DAG(
     )
 
     # -----------------
+    # dbt tasks
+    # -----------------
+    dbt_build_silver = BashOperator(
+        task_id="dbt_build_silver",
+        bash_command="""
+        set -euo pipefail
+        cd /opt/airflow/project/dbt/flight_weather_dbt
+        /home/airflow/.local/bin/dbt build --select silver
+        """,
+    )
+
+
+    # -----------------
     # Dependencies
     # -----------------
     adb_to_s3 >> airports_to_s3 >> openweather_to_s3
     openweather_to_s3 >> test_snowflake
     test_snowflake >> [copy_flights_bronze, copy_weather_bronze]
     [copy_flights_bronze, copy_weather_bronze] >> verify_loads
+    verify_loads >> dbt_build_silver
