@@ -116,4 +116,3 @@ left join wx_asof x
   on x.flight_key = f.flight_key
 left join label_window l
   on l.flight_key = f.flight_key
-;
