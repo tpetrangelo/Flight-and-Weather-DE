@@ -18,9 +18,10 @@ models:
     tests:
       # Requires dbt_utils in packages.yml + dbt deps
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - flight_key
-            - loaded_at_ts_utc
+          arguments:
+            combination_of_columns:
+              - flight_key
+              - loaded_at_ts_utc
 
   - name: fct_fids_flight_latest
     description: "Latest known state per flight_key (deduped). One row per flight_key."
