@@ -25,7 +25,7 @@ try:
 except ImportError:
     from airflow.operators.python import PythonOperator  # type: ignore
 
-from airflow.providers.standard.operators.bash import BashOperator 
+from airflow.operators.bash import BashOperator # type: ignore
 
 # ============================
 # Path bootstrap
@@ -202,7 +202,7 @@ with DAG(
         bash_command="""
         set -euo pipefail
         cd /opt/airflow/project/dbt/flight_weather_dbt
-        /home/airflow/.local/bin/dbt build --select silver
+        dbt build --select silver
         """,
     )
 

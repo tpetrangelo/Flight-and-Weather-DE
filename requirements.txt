@@ -8,4 +8,3 @@ python-dotenv
 cryptography
 snowflake-connector-python
 dbt-snowflake
-apache-airflow-providers-standard
