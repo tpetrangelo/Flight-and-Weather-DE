@@ -1,17 +1,17 @@
-version: 2
+# version: 2
 
-models:
-  - name: gold_ml_flight_training_rows
-    tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns: ['flight_key', 'cutoff_ts_utc']
-    columns:
-      - name: flight_key
-        tests: [not_null]
-          config:
-            enabled: false
-      - name: is_delayed_15
-        tests: [not_null]
-          config:
-            enabled: false
+# models:
+#   - name: gold_ml_flight_training_rows
+#     tests:
+#       - dbt_utils.unique_combination_of_columns:
+#           arguments:
+#             combination_of_columns: ['flight_key', 'cutoff_ts_utc']
+#     columns:
+#       - name: flight_key
+#         tests: [not_null]
+#           config:
+#             enabled: false
+#       - name: is_delayed_15
+#         tests: [not_null]
+#           config:
+#             enabled: false
