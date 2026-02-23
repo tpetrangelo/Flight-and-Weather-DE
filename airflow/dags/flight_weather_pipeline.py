@@ -197,12 +197,28 @@ with DAG(
     # -----------------
     # dbt tasks
     # -----------------
+
+    DBT_PROJECT_DIR = "/opt/airflow/project/dbt/flight_weather_dbt"
+    DBT_PROFILES_DIR = "/opt/airflow/dbt_profiles"
+
     dbt_build_silver = BashOperator(
         task_id="dbt_build_silver",
-        bash_command="""
+        bash_command=f"""
         set -euo pipefail
-        cd /opt/airflow/project/dbt/flight_weather_dbt
+        export DBT_PROFILES_DIR="{DBT_PROFILES_DIR}"
+        cd "{DBT_PROJECT_DIR}"
+        dbt --version
         dbt build --select silver
+        """,
+    )
+
+    dbt_test_freshness = BashOperator(
+        task_id="dbt_test_freshness",
+        bash_command=f"""
+        set -euo pipefail
+        export DBT_PROFILES_DIR="{DBT_PROFILES_DIR}"
+        cd "{DBT_PROJECT_DIR}"
+        dbt test --select tag:freshness
         """,
     )
 
