@@ -11,6 +11,18 @@ models:
         tests:
           - not_null
 
+  - name: fct_weather_latest
+    description: "Latest weather observation per airport_iata."
+    columns:
+      - name: airport_iata
+        tests:
+          - not_null
+          - unique
+
+      - name: obs_ts_utc
+        tests:
+          - not_null
+
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
