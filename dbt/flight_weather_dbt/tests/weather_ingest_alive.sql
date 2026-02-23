@@ -8,4 +8,4 @@ with recent as (
 )
 select *
 from recent
-where rows_last_75m = 0;
+where rows_last_75m = 0
