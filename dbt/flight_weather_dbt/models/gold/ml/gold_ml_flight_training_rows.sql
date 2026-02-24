@@ -19,13 +19,13 @@ with snaps as (
 cutoff_candidates as (
     select
         *,
-        dateadd('minute', -60, sched_dep_ts_utc) as cutoff_ts_utc,
+        dateadd('minute', -180, sched_dep_ts_utc) as cutoff_ts_utc,
         row_number() over (
           partition by flight_key
           order by loaded_at_ts_utc desc
         ) as rn_latest_overall
     from snaps
-    where loaded_at_ts_utc <= dateadd('minute', -60, sched_dep_ts_utc)
+    where loaded_at_ts_utc <= cutoff_ts_utc
 ),
 
 flight_cutoff as (
