@@ -45,7 +45,7 @@ def _fetch_adb_records(airports: Iterable[str]) -> pd.DataFrame:
     for airport in airports:
         print(f"Calling API for {airport}")
         url = f"https://aerodatabox.p.rapidapi.com/flights/airports/Iata/{airport}"
-        querystring = {"durationMinutes": "180", "direction": "Departure"}
+        querystring = {"durationMinutes": "180", "direction": "Departure","withCargo": "false","withPrivate": "false"}
         headers = {
             "Accept": "application/json",
             "X-RapidAPI-Key": AERODATABOX_API_KEY,
