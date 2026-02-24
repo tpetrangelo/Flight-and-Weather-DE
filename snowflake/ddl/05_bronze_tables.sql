@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     airline__icao	                STRING,
     movement__runway                STRING,
     source_file                     STRING,
-    loaded_at                       TIMESTAMP_NTZ   DEFAULT CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP()) NOT NULL,
+    loaded_at                       TIMESTAMP_NTZ   DEFAULT (CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ) NOT NULL,
     row_hash                        BINARY(32)
 );
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS BRONZE.WEATHER (
     weather_desc	        STRING,
     openweather_city_id     INT NOT NULL,
     source_file             STRING,
-    loaded_at               TIMESTAMP_NTZ   DEFAULT CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP()) NOT NULL,
+    loaded_at               TIMESTAMP_NTZ   DEFAULT (CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ) NOT NULL,
     row_hash                BINARY(32)
 
 );
