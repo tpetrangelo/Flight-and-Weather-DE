@@ -20,7 +20,6 @@ COPY INTO BRONZE.WEATHER (
     weather_desc,
     openweather_city_id,
     source_file,
-    loaded_at,
     row_hash
 )
 FROM (
@@ -42,7 +41,6 @@ FROM (
         $1:openweather_city_id::INT                      AS openweather_city_id,
 
         METADATA$FILENAME                                AS source_file,
-        convert_timezone('UTC', current_timestamp())     AS loaded_at,
 
         -- Weather grain hash: airport + observation timestamp (+ coords as tie-breakers)
         SHA2(

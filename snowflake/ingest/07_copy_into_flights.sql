@@ -36,7 +36,6 @@ COPY INTO BRONZE.FLIGHTS (
     airline__icao,
     movement__runway,
     source_file,
-    loaded_at,
     row_hash
 )
 FROM (
@@ -81,7 +80,6 @@ FROM (
     $1:movement__runway::STRING                        AS movement__runway,
 
     METADATA$FILENAME                                  AS source_file,
-    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP())       AS loaded_at,
 
     -- Stable hash: hash of the core business identity fields (plus scheduled time + airports).
     -- This avoids hashing the entire VARIANT, which can be sensitive to serialization differences.
