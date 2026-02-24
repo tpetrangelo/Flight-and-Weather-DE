@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     movement__revisedTime__local	TIMESTAMP_TZ,
     movement__runwayTime__utc	    TIMESTAMP_NTZ,
     movement__runwayTime__local	    TIMESTAMP_TZ,
-    movement__terminal	            CHAR,
-    movement__quality	            ARRAY,
+    movement__terminal	            STRING,
+    movement__quality	            VARIANT,
     aircraft__reg	                STRING,
     aircraft__modeS	                STRING,
     aircraft__model	                STRING,
@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS BRONZE.FLIGHTS (
     airline__icao	                STRING,
     movement__runway                STRING,
     source_file                     STRING,
-    loaded_at                       TIMESTAMP_NTZ   DEFAULT CURRENT_TIMESTAMP() NOT NULL
+    loaded_at                       TIMESTAMP_NTZ   DEFAULT CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP()) NOT NULL,
+    row_hash                        BINARY(32)
 );
 
 CREATE TABLE IF NOT EXISTS BRONZE.WEATHER (
@@ -49,8 +50,10 @@ CREATE TABLE IF NOT EXISTS BRONZE.WEATHER (
     visibility	            NUMBER(5,0),
     weather_main	        STRING,
     weather_desc	        STRING,
-    openweather_city_id     INT
- NOT NULL
+    openweather_city_id     INT NOT NULL,
+    loaded_at               TIMESTAMP_NTZ   DEFAULT CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP()) NOT NULL,
+    row_hash                BINARY(32)
+
 );
 
 -- Verify tables exist

@@ -42,7 +42,7 @@ FROM (
         $1:openweather_city_id::INT                      AS openweather_city_id,
 
         METADATA$FILENAME                                AS source_file,
-        CURRENT_TIMESTAMP()                              AS loaded_at,
+        convert_timezone('UTC', current_timestamp())     AS loaded_at,
 
         -- Weather grain hash: airport + observation timestamp (+ coords as tie-breakers)
         SHA2(

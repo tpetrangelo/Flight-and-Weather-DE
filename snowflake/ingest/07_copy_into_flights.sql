@@ -61,11 +61,11 @@ FROM (
     $1:movement__airport__timeZone::STRING             AS movement__airport__timeZone,
 
     TRY_TO_TIMESTAMP_NTZ($1:movement__scheduledTime__utc::STRING)   AS movement__scheduledTime__utc,
-    TRY_TO_TIMESTAMP_NTZ($1:movement__scheduledTime__local::STRING) AS movement__scheduledTime__local,
+    TRY_TO_TIMESTAMP_TZ($1:movement__scheduledTime__local::STRING) AS movement__scheduledTime__local,
     TRY_TO_TIMESTAMP_NTZ($1:movement__revisedTime__utc::STRING)     AS movement__revisedTime__utc,
-    TRY_TO_TIMESTAMP_NTZ($1:movement__revisedTime__local::STRING)   AS movement__revisedTime__local,
+    TRY_TO_TIMESTAMP_TZ($1:movement__revisedTime__local::STRING)   AS movement__revisedTime__local,
     TRY_TO_TIMESTAMP_NTZ($1:movement__runwayTime__utc::STRING)      AS movement__runwayTime__utc,
-    TRY_TO_TIMESTAMP_NTZ($1:movement__runwayTime__local::STRING)    AS movement__runwayTime__local,
+    TRY_TO_TIMESTAMP_TZ($1:movement__runwayTime__local::STRING)    AS movement__runwayTime__local,
 
     $1:movement__terminal::STRING                      AS movement__terminal,
     $1:movement__quality                               AS movement__quality,  -- keep as VARIANT-compatible column type
@@ -81,7 +81,7 @@ FROM (
     $1:movement__runway::STRING                        AS movement__runway,
 
     METADATA$FILENAME                                  AS source_file,
-    CURRENT_TIMESTAMP()                                AS loaded_at,
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP())       AS loaded_at,
 
     -- Stable hash: hash of the core business identity fields (plus scheduled time + airports).
     -- This avoids hashing the entire VARIANT, which can be sensitive to serialization differences.
