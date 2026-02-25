@@ -15,7 +15,7 @@ with snaps as (
     from {{ ref('stg_fids_flight_snapshots') }}
 ),
 
--- choose ONE snapshot per flight at or before (sched_dep - 180 minutes)
+-- choose ONE snapshot per flight at or before (sched_dep - 60 minutes)
 cutoff_candidates as (
     select
         *,
