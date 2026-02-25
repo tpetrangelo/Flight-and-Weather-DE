@@ -222,6 +222,18 @@ with DAG(
         """,
     )
 
+
+    dbt_build_gold = BashOperator(
+        task_id="dbt_build_gold",
+        bash_command=f"""
+        set -euo pipefail
+        export DBT_PROFILES_DIR="{DBT_PROFILES_DIR}"
+        cd "{DBT_PROJECT_DIR}"
+        dbt --version
+        dbt build --select gold
+        """,
+    )
+
  
     # -----------------
     # Dependencies
@@ -230,4 +242,4 @@ with DAG(
     openweather_to_s3 >> test_snowflake
     test_snowflake >> [copy_flights_bronze, copy_weather_bronze]
     [copy_flights_bronze, copy_weather_bronze] >> verify_loads
-    verify_loads >> dbt_build_silver >> dbt_test_freshness
+    verify_loads >> dbt_build_silver >> dbt_test_freshness >> dbt_build_gold
