@@ -11,4 +11,4 @@ COMPOSE_FILE="docker/docker-compose.yaml"
 
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" down
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build --no-cache
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -dgit
