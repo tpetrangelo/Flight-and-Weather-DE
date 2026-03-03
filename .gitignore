@@ -213,3 +213,7 @@ __marimo__/
 #Keys
 /secrets
 rsa_key.pub
+
+replacements.txt
+
+git-filter-repo
