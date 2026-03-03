@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-git pull
+# run from repo root even if invoked elsewhere
+cd "$(dirname "$0")"
 
-docker compose -f docker/docker-compose.yaml down
+git pull --ff-only
 
-docker compose -f docker/docker-compose.yaml build --no-cache
+ENV_FILE="./.env"
+COMPOSE_FILE="docker/docker-compose.yaml"
 
-docker compose -f docker/docker-compose.yaml up -d
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" down
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build --no-cache
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d
