@@ -1,18 +1,3 @@
-This is a strong project. Structurally clean, real infrastructure, real warehouse, real orchestration — not a toy. You’re ahead of most portfolio repos already.
-
-I’m going to rewrite your README to:
-
-* Be tighter
-* Reflect what you actually built
-* Sound more senior / production-minded
-* Be optimized for recruiters + DE interviews
-* Remove generic filler
-* Emphasize architecture + decisions
-
-Below is a tailored README for your repo.
-
----
-
 # ✈️ Flight & Weather Data Engineering Pipeline
 
 A production-style data engineering pipeline that ingests aviation and weather data, stores raw data in S3, transforms it in Snowflake using a layered architecture (Bronze → Silver → Gold), and orchestrates everything with Airflow running in Docker on AWS EC2.
