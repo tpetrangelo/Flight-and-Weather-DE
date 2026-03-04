@@ -131,7 +131,7 @@ with DAG(
     dag_id="ingest_adb_and_openweather_snowflake",
     default_args=default_args,
     start_date=datetime(2026, 1, 1),
-    schedule="*/30 * * * *",
+    schedule="0 */6 * * *",
     catchup=False,
     tags=["bronze", "silver", "snowflake", "dbt"],
 ) as dag:
